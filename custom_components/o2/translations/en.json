@@ -1,0 +1,34 @@
+{
+    "title": "O2 (UK)",
+    "config": {
+      "step": {
+        "user": {
+          "description": "Configure your O2 account.",
+          "data": {
+            "email": "Email address",
+            "password": "Password"
+          }
+        }
+      },
+      "error": {
+        "auth_error": "Invalid credentials provided."
+      },
+      "abort": {}
+    },
+    "options": {
+      "step": {
+        "init": {
+          "description": "Update your O2 account information.",
+          "data": {
+            "email": "Email address",
+            "password": "Password"
+          }
+        }
+      },
+      "error": {
+        "auth_error": "Invalid credentials provided."
+      },
+      "abort": {}
+    },
+    "issues": {}
+}
