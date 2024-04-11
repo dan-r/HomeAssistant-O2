@@ -19,6 +19,10 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config, async_add_entities):
     """Set up sensors."""
     coordinator = hass.data[DOMAIN][DATA_COORDINATOR]
+    client = hass.data[DOMAIN][DATA_APICLIENT]
+
+    if client.number is None:
+        raise Exception("Fetching plan information failed")
 
     entities = [DataSensor(coordinator, hass)]
 
