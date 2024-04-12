@@ -20,7 +20,8 @@ async def async_setup_entry(hass, config, async_add_entities):
     entities = [
         O2AllowanceSensor(coordinator, hass, "Data Remaining", "data", UnitOfInformation.GIGABYTES, "mdi:chart-donut"),
         O2AllowanceSensor(coordinator, hass, "Texts Remaining", "text", None, "mdi:message"),
-        O2AllowanceSensor(coordinator, hass, "Minutes Remaining", "voice", None, "mdi:phone")
+        O2AllowanceSensor(coordinator, hass, "Minutes Remaining", "voice", None, "mdi:phone"),
+        O2AllowanceResetSensor(coordinator, hass)
     ]
 
     async_add_entities(entities, update_before_add=True)
@@ -78,3 +79,39 @@ class O2AllowanceSensor(CoordinatorEntity, SensorEntity):
     def icon(self):
         """Icon of the sensor."""
         return self._icon
+
+class O2AllowanceResetSensor(CoordinatorEntity, SensorEntity):
+    _attr_has_entity_name = True
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_name = "Allowance Reset Date"
+
+    def __init__(self, coordinator, hass):
+        super().__init__(coordinator=coordinator)
+
+        self._client = hass.data[DOMAIN][DATA_APICLIENT]
+
+        self.entity_id = generate_entity_id(
+            "sensor.{}", f"o2_{self._client.number}_{self._attr_name.lower().replace(' ', '_')}", hass=hass)
+
+        self._attr_device_info = self._client.get_device_info()
+
+    @property
+    def unique_id(self) -> str:
+        """Return the unique ID of the sensor."""
+        return self.entity_id
+
+    @property
+    def state(self):
+        """Return the state."""
+        if self.coordinator.data:
+            expiresDate = self.coordinator.data['allowancesBalance']['data'][0]['details'][0]['expiresDate']
+            date_obj = datetime.strptime(expiresDate, '%d %B %Y')
+            
+            return date_obj.isoformat()
+        
+        return None
+    
+    @property
+    def icon(self):
+        """Icon of the sensor."""
+        return "mdi:calendar-range"
