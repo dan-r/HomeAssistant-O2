@@ -1,5 +1,6 @@
 import requests
 import logging
+from time import time
 from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN
 
@@ -10,7 +11,8 @@ class O2ApiClient:
         self._username = email
         self._password = password
         self._device_info = None
-        
+        self._token_birth = 0
+
         self.number = None
 
         self._session = requests.Session()
@@ -36,6 +38,8 @@ class O2ApiClient:
         if username and password:
             self._username = username
             self._password = password
+
+        self._token_birth = time()
 
         return True
         
@@ -64,16 +68,24 @@ class O2ApiClient:
 
         return data_page_response.text.split("Liferay.authToken = '")[1].split("'")[0]
 
-    def get_allowances(self):
+    def _post(self, url):
+        # Refresh token if its over x mins old
+        if time() - self._token_birth > 3600:
+            self.create_session()
+        
         csrfToken = self.get_csrf()
 
-        allowance_url = 'https://mymobile2.o2.co.uk/web/guest/account?p_p_id=O2UKAccountPortlet_INSTANCE_0ssTPnzpDk4K&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=getBoltOnsAndCurrentTariff&p_p_cacheability=cacheLevelPage'
-        allowance_response = self._session.post(allowance_url, headers={'X-Csrf-Token': csrfToken})
+        return self._session.post(url, headers={'X-Csrf-Token': csrfToken})
 
-        if allowance_response.status_code != 200:
-            raise ApiException("Failed to get allowance. Status code:", allowance_response.status_code)
+    def get_allowances(self):
+        resp = self._post('https://mymobile2.o2.co.uk/web/guest/account?p_p_id=O2UKAccountPortlet_INSTANCE_0ssTPnzpDk4K&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=getBoltOnsAndCurrentTariff&p_p_cacheability=cacheLevelPage')
         
-        resp = allowance_response.json()
+        if resp.status_code != 200:
+            self._token_birth = 0
+            raise ApiException("Failed to get allowance. Status code:", resp.status_code)
+        
+        resp = resp.json()
+
         self.update_device_info(resp['tariffVM'])
 
         return resp
