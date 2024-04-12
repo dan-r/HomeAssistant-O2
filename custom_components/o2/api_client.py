@@ -11,7 +11,7 @@ class O2ApiClient:
         self._username = email
         self._password = password
         self._device_info = None
-        self._token_birth = 0
+        self._session_birth = 0
 
         self.number = None
 
@@ -42,7 +42,7 @@ class O2ApiClient:
             self._username = username
             self._password = password
 
-        self._token_birth = time()
+        self._session_birth = time()
         
         _LOGGER.debug("O2 session created")
         return True
@@ -51,7 +51,7 @@ class O2ApiClient:
         resp = self._post('https://mymobile2.o2.co.uk/web/guest/account?p_p_id=O2UKAccountPortlet_INSTANCE_0ssTPnzpDk4K&p_p_lifecycle=2&p_p_state=normal&p_p_mode=view&p_p_resource_id=getBoltOnsAndCurrentTariff&p_p_cacheability=cacheLevelPage')
         
         if resp.status_code != 200:
-            self._token_birth = 0
+            self._session_birth = 0
             raise ApiException("Failed to get allowance. Status code:", resp.status_code)
         
         resp = resp.json()
@@ -64,8 +64,8 @@ class O2ApiClient:
     # Internal API methods
 
     def _post(self, url):
-        # Refresh token if its over 30 mins old
-        if time() - self._token_birth > 2700:
+        # Refresh session if its over 45 mins old
+        if time() - self._session_birth > 2700:
             self.create_session()
         
         csrfToken = self._get_csrf()
