@@ -30,15 +30,15 @@ async def async_setup_entry(hass, entry):
     await hass.async_add_executor_job(session.create_session)
 
     coordinator = hass.data[DOMAIN][DATA_COORDINATOR] = O2Coordinator(hass, config)
- 
+
+    # Init coordinator
+    await coordinator.async_config_entry_first_refresh() 
+
     _LOGGER.debug("Initialising entities")
     for component in ENTITY_TYPES:
         hass.async_create_task(
             hass.config_entries.async_forward_entry_setup(entry, component)
         )
-
-    # Init fetch and state coordinators
-    await coordinator.async_config_entry_first_refresh()
 
     entry.async_on_unload(entry.add_update_listener(async_update_listener))
 

@@ -1,8 +1,9 @@
 # O2 for Home Assistant
 
-An unofficial integration for fetching O2 allowance data.
+An unofficial integration for fetching O2 allowance data. This has only be tested with an O2 account (not VMO2) with a single plan.
 
 This is currently a work-in-progress.
+
 
 ## Installation
 
