@@ -20,6 +20,10 @@ class O2ConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, info):
         errors = {}
         if info is not None:
+            # Abort if entry already exists
+            await self.async_set_unique_id(info["email"])
+            self._abort_if_unique_id_configured()
+
             # Validate credentials
             session = O2ApiClient(
                 info["email"],
