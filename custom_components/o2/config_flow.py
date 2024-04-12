@@ -33,7 +33,7 @@ class O2ConfigFlow(ConfigFlow, domain=DOMAIN):
 
             if len(errors) == 0:
                 return self.async_create_entry(
-                    title="O2 Account",
+                    title=info['email'],
                     data=info
                 )
 
@@ -57,12 +57,11 @@ class O2OptionsFlow(OptionsFlow):
         if options is not None:
             data = dict(self._config_entry.data)
             # Validate credentials
-            session = O2ApiClient(
-                info["email"],
-                info["password"]
-            )
-
             if "password" in options:
+                session = O2ApiClient(
+                    options["email"],
+                    options["password"]
+                )
                 try:
                     await self.hass.async_add_executor_job(session.create_session)
                 except:
@@ -78,7 +77,7 @@ class O2OptionsFlow(OptionsFlow):
                 # Update data
                 data.update(options)
                 self.hass.config_entries.async_update_entry(
-                    self._config_entry, data=data
+                    self._config_entry, data=data, title=data['email']
                 )
 
                 # Update options
