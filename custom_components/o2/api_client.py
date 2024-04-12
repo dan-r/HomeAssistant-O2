@@ -40,7 +40,6 @@ class O2ApiClient:
             self._password = password
 
         self._token_birth = time()
-
         return True
         
     def get_device_info(self):
@@ -69,8 +68,8 @@ class O2ApiClient:
         return data_page_response.text.split("Liferay.authToken = '")[1].split("'")[0]
 
     def _post(self, url):
-        # Refresh token if its over x mins old
-        if time() - self._token_birth > 3600:
+        # Refresh token if its over 30 mins old
+        if time() - self._token_birth > 1800:
             self.create_session()
         
         csrfToken = self.get_csrf()
