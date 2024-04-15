@@ -17,6 +17,7 @@ class O2Coordinator(DataUpdateCoordinator):
             update_interval=timedelta(minutes=30),
         )
         self._hass = hass
+        self._data = None
 
     async def _async_update_data(self):
         """Fetch data from API."""
@@ -24,7 +25,9 @@ class O2Coordinator(DataUpdateCoordinator):
         
         try:
             data = await self._hass.async_add_executor_job(client.get_allowances)
+            self._data = data
+            
             return data
         except BaseException:
             _LOGGER.warning("Error communicating with API")
-            return False
+            return self._data
