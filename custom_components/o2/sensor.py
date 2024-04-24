@@ -38,16 +38,12 @@ class O2AllowanceSensor(CoordinatorEntity, SensorEntity):
         self._data_type = data_type
         self._unit_of_measurement = unit_of_measurement
         self._icon = icon
+        self._attr_unique_id = f"o2_{self._client.number}_{self._attr_name.lower().replace(' ', '_')}"
 
         self.entity_id = generate_entity_id(
-            "sensor.{}", f"o2_{self._client.number}_{self._attr_name.lower().replace(' ', '_')}", hass=hass)
+            "sensor.{}", self._attr_unique_id, hass=hass)
 
         self._attr_device_info = self._client.get_device_info()
-
-    @property
-    def unique_id(self) -> str:
-        """Return the unique ID of the sensor."""
-        return self.entity_id
 
     @property
     def native_value(self):
@@ -89,16 +85,12 @@ class O2AllowanceResetSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator=coordinator)
 
         self._client = hass.data[DOMAIN][DATA_APICLIENT]
+        self._attr_unique_id = f"o2_{self._client.number}_{self._attr_name.lower().replace(' ', '_')}"
 
         self.entity_id = generate_entity_id(
-            "sensor.{}", f"o2_{self._client.number}_{self._attr_name.lower().replace(' ', '_')}", hass=hass)
+            "sensor.{}", self._attr_unique_id, hass=hass)
 
         self._attr_device_info = self._client.get_device_info()
-
-    @property
-    def unique_id(self) -> str:
-        """Return the unique ID of the sensor."""
-        return self.entity_id
 
     @property
     def state(self):
